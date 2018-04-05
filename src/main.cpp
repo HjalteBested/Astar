@@ -8,24 +8,24 @@ using namespace std;
 using namespace cv;
 
 const string M50_1[] = {
-        "/Users/HBM/Dropbox/MSc Project/C/Laser/HMAstar/assets/Map50_1.bmp",
-        "/Users/HBM/Dropbox/MSc Project/C/Laser/HMAstar/assets/Map50_1_Out.png",
-        "/Users/HBM/Dropbox/MSc Project/C/Laser/HMAstar/assets/Map50_1_Path.png"
+        "assets/Map50_1.bmp",
+        "assets/Map50_1_Out.png",
+        "assets/Map50_1_Path.png"
 };
 
 const string M50_2[] = {
-        "/Users/HBM/Dropbox/MSc Project/C/Laser/HMAstar/assets/Map50_2.bmp",
-        "/Users/HBM/Dropbox/MSc Project/C/Laser/HMAstar/assets/Map50_2_Out.png",
-        "/Users/HBM/Dropbox/MSc Project/C/Laser/HMAstar/assets/Map50_2_Path.png"
+        "assets/Map50_2.bmp",
+        "assets/Map50_2_Out.png",
+        "assets/Map50_2_Path.png"
 };
 
 const string M50_3[] = {
-        "/Users/HBM/Dropbox/MSc Project/C/Laser/HMAstar/assets/Map50_3.bmp",
-        "/Users/HBM/Dropbox/MSc Project/C/Laser/HMAstar/assets/Map50_3_Out.png",
-        "/Users/HBM/Dropbox/MSc Project/C/Laser/HMAstar/assets/Map50_3_Path.png"
+        "assets/Map50_3.bmp",
+        "assets/Map50_3_Out.png",
+        "assets/Map50_3_Path.png"
 };
 
-const string *FILE_PATH = M50_1;
+const string *FILE_PATH = M50_3;
 
 Astar myAstar;
 Mat map;
