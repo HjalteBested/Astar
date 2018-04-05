@@ -25,7 +25,7 @@ const string M50_3[] = {
         "assets/Map50_3_Path.png"
 };
 
-const string *FILE_PATH = M50_3;
+const string *FILE_PATH = M50_1;
 
 Astar myAstar;
 Mat map;
