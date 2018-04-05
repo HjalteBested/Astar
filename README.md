@@ -3,7 +3,7 @@ A* pathfinding algorithm (a.k.a. A* search algorithm) written in C++
 
 This is an widely used pathfinding and searching algorithm; learn more about A* at [Wikipedia](https://en.wikipedia.org/wiki/A*_search_algorithm).
 
-This implementation is heavily based on Makito Sumi's version found here: [GitHub](https://github.com/SumiMakito/A-star). I have changed alot of the structure in the code and implemented Astar as a class. Furthermore, I have fixed some problems with the scaling of the heuristic function and added AMITS tie-breaker as an option, see: [breaking-ties](http://theory.stanford.edu/~amitp/GameProgramming/Heuristics.html#breaking-ties).
+This implementation is heavily based on Makito Sumi's version found here: [Makito Sumi's A-star](https://github.com/SumiMakito/A-star). I have changed alot of the structure in the code and implemented Astar as a class. Furthermore, I have fixed some problems with the scaling of the heuristic function and added AMITS tie-breaker as an option, see: [breaking-ties](http://theory.stanford.edu/~amitp/GameProgramming/Heuristics.html#breaking-ties).
 
 OpenCV is not necessarily required, provided that you have found another way to convert input images into arrays which have the same format used in the example.
 
