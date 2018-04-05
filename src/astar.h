@@ -22,7 +22,7 @@ const int NODE_TYPE_END = 3;
 
 const int G_DIRECT_COST   = 100; 
 const int G_DIAGONAL_COST = 141;	// ≈ 100 sqrt(2)
-const int H_AMITGAIN = 0;
+const int H_AMITGAIN = 0;			// Zero means it is disabled completely
 
 class MapSize {
 public:
@@ -236,10 +236,12 @@ public:
     	return &mapData[y * mapSize.width + x];
 	}
 
+	/** Put a note into the map, the location if defined by the node itself! */
 	void putNode(MapNode node){
 		mapData[node.y * mapSize.width + node.x] = node;
 	}
 
+	/** Print the map */
 	void printMap(){
 	    for (int y = 0; y < mapSize.height; y++) {
 	        for (int x = 0; x < mapSize.width; x++) {
