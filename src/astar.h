@@ -5,8 +5,8 @@
  * \date 4. April 2018	
 */
 
-#ifndef HMASTAR_H
-#define HMASTAR_H
+#ifndef ASTAR_H
+#define ASTAR_H
 
 using namespace std;
 
@@ -22,7 +22,7 @@ const int NODE_TYPE_END = 3;
 
 const int G_DIRECT_COST   = 100; 
 const int G_DIAGONAL_COST = 141;	// ≈ 100 sqrt(2)
-const int H_AMITGAIN = 0;			// Zero means it is disabled completely
+const int H_AMITGAIN = 2;			// Zero means it is disabled completely
 
 class MapSize {
 public:
@@ -119,7 +119,7 @@ public:
 		int dx2 = node1->x - node3->x;
 		int dy2 = node1->y - node3->y;
 		int cross = dx1*dy2 - dx2*dy1;
-		if( cross<0 ) cross = -cross;
+		if( cross<0 ) return -cross;
 		return cross;
 	}
 
@@ -156,7 +156,7 @@ public:
 	        node = openList.at(0);
 
 	        for (int i = 0, max = openList.size(); i < max; i++) {
-	            if (openList[i]->f() <= node->f() && openList[i]->h < node->h) {
+	            if (openList[i]->f() <= node->f()) {
 	                node = openList[i];
 	            }
 	        }
@@ -175,7 +175,7 @@ public:
 	        }
 	        vector<MapNode *> neighborNodes = neighbors(node);
 	        cout << "       ... has " << neighborNodes.size() << " neighbors" << endl;
-	        for (int i = 0; i < neighborNodes.size(); i++) {
+	        for (uint i = 0; i < neighborNodes.size(); i++) {
 	            MapNode *_node = neighborNodes[i];
 	            if (_node->flag == NODE_FLAG_CLOSED || _node->type == NODE_TYPE_OBSTACLE) {
 	                continue;
@@ -208,6 +208,13 @@ public:
 	        }
 	        reverse(path.begin(), path.end());
 	    }
+
+	    /*
+	    reversedPtr = 0;
+	    targetNode = 0;
+	    startNode = 0;
+		*/
+
 	    return path;
 	}
 
@@ -238,7 +245,8 @@ public:
 
 	/** Put a note into the map, the location if defined by the node itself! */
 	void putNode(MapNode node){
-		mapData[node.y * mapSize.width + node.x] = node;
+		if (node.x >= 0 && node.y >= 0 && node.x < mapSize.width && node.y < mapSize.height)
+			mapData[node.y * mapSize.width + node.x] = node;
 	}
 
 	/** Print the map */

@@ -7,10 +7,11 @@ BUILD_DIR := ./build
 SRC_DIRS  := ./src
 
 CC = g++
-CFLAGS = -c -Wall -O1 $(shell pkg-config --cflags eigen3 opencv)
+#-Werror -std=c++0x
+CFLAGS = -c -Wall -Wextra -std=c++11 $(shell pkg-config --cflags opencv)
 
 LDFLAGS = -L /usr/local/lib 
-LIBS = -lpthread $(shell pkg-config --libs eigen3 opencv)
+LIBS = -lpthread $(shell pkg-config --libs opencv)
 
 SRCS := $(shell	find $(SRC_DIRS)	-name	*.cpp	-or	-name	*.c	-or	-name	*.s)
 OBJS := $(SRCS:%=$(BUILD_DIR)/%.o)
@@ -18,7 +19,6 @@ DEPS := $(OBJS:.o=.d)
 
 $(TARGET_EXEC): $(OBJS)
 	$(CC) $(OBJS) -o $@ $(LDFLAGS) $(LIBS)
-	$(MKDIR_P) ./simData
 
 # assembly
 $(BUILD_DIR)/%.s.o: %.s

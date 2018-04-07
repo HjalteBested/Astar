@@ -66,7 +66,6 @@ int main(){
 
     myAstar.printMap();
 
-    int i=1;
     cout << "startNode=(" << myAstar.startNode->x  << ", " << myAstar.startNode->y << ")" << endl;
     cout << "endNode=("   << myAstar.targetNode->x << ", " << myAstar.targetNode->y << ")" << endl;
 
@@ -82,7 +81,7 @@ int main(){
 
 void drawPath(Mat &map, vector<MapNode *> path) {
     cvtColor(map, map, COLOR_BGR2HSV);
-    for (int i = 0; i < path.size() - 1; i++) {
+    for (uint i = 0; i < path.size() - 1; i++) {
         MapNode *node = path[i];
         map.at<Vec3b>(node->y, node->x) = Vec3b(20 + (1.0 - ((double) i / path.size())) * 80, 200, 255);
         cout << "->(" << node->x << "," << node->y << ")";
@@ -94,7 +93,7 @@ void drawPath(Mat &map, vector<MapNode *> path) {
 }
 
 void drawOpenList() {
-    for (int i = 0; i < myAstar.openList.size(); i++) {
+    for (uint i = 0; i < myAstar.openList.size(); i++) {
         MapNode *node = myAstar.openList[i];
         if (node == myAstar.startNode || node == myAstar.targetNode) continue;
         map.at<Vec3b>(node->y, node->x) = Vec3b(210, 210, 210);
@@ -102,7 +101,7 @@ void drawOpenList() {
 }
 
 void drawClosedList() {
-    for (int i = 0; i < myAstar.closedList.size(); i++) {
+    for (uint i = 0; i < myAstar.closedList.size(); i++) {
         MapNode *node = myAstar.closedList[i];
         if (node == myAstar.startNode || node == myAstar.targetNode) continue;
         map.at<Vec3b>(node->y, node->x) = Vec3b(210, 210, 210);
