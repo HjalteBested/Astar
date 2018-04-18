@@ -7,8 +7,8 @@ BUILD_DIR := ./build
 SRC_DIRS  := ./src
 
 CC = g++
-#-Werror -std=c++0x
-CFLAGS = -c -Wall -Wextra -std=c++11 $(shell pkg-config --cflags opencv)
+#-Werror -std=c++0x -Wextra
+CFLAGS = -c -Wall -std=c++11 $(shell pkg-config --cflags opencv)
 
 LDFLAGS = -L /usr/local/lib 
 LIBS = -lpthread $(shell pkg-config --libs opencv)

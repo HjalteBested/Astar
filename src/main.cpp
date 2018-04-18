@@ -60,11 +60,12 @@ int main(){
             } else {
                 map.at<Vec3b>(y, x) = Vec3b(0, 0, 0);
                 myAstar.putNode(MapNode(x, y, NODE_TYPE_OBSTACLE));
+                cout << "***  ** iT Happened **  **** \n";
             }
         }
     }
 
-    myAstar.printMap();
+    // myAstar.printMap();
 
     cout << "startNode=(" << myAstar.startNode->x  << ", " << myAstar.startNode->y << ")" << endl;
     cout << "endNode=("   << myAstar.targetNode->x << ", " << myAstar.targetNode->y << ")" << endl;
@@ -76,17 +77,19 @@ int main(){
     drawPath(map, path);
     imwrite(FILE_PATH[2], map);
 
+    myAstar.clear();
     return 0;
 }
 
 void drawPath(Mat &map, vector<MapNode *> path) {
     cvtColor(map, map, COLOR_BGR2HSV);
+    cout << "(" << myAstar.startNode->x << "," << myAstar.startNode->y << ")";
     for (uint i = 0; i < path.size() - 1; i++) {
         MapNode *node = path[i];
         map.at<Vec3b>(node->y, node->x) = Vec3b(20 + (1.0 - ((double) i / path.size())) * 80, 200, 255);
         cout << "->(" << node->x << "," << node->y << ")";
     }
-    cout << endl;
+    cout << "->(" << myAstar.targetNode->x << "," << myAstar.targetNode->y << ")" << endl;
 
     cvtColor(map, map, COLOR_HSV2BGR);
     resize(map, map, Size(500, 500), 0, 0, INTER_NEAREST);
