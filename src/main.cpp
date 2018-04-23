@@ -7,6 +7,12 @@
 using namespace std;
 using namespace cv;
 
+const string M50_0[] = {
+        "assets/Map50_0.bmp",
+        "assets/Map50_0_Out.png",
+        "assets/Map50_0_Path.png"
+};
+
 const string M50_1[] = {
         "assets/Map50_1.bmp",
         "assets/Map50_1_Out.png",
@@ -25,7 +31,7 @@ const string M50_3[] = {
         "assets/Map50_3_Path.png"
 };
 
-const string *FILE_PATH = M50_1;
+const string *FILE_PATH = M50_3;
 
 Astar myAstar;
 Mat map;
@@ -42,6 +48,7 @@ int main(){
     imwrite(FILE_PATH[1], resized);
 
     myAstar = Astar(map.cols, map.rows);
+    myAstar.H_AMITGAIN = 0;
 
     for (int y = 0; y < map.rows; y++) {
         for (int x = 0; x < map.cols; x++) {
