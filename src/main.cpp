@@ -2,7 +2,7 @@
 #include <opencv2/imgcodecs.hpp>
 #include <iostream>
 #include <opencv2/imgproc.hpp>
-#include "astar.h"
+#include "astar.hpp"
 
 using namespace std;
 using namespace cv;
