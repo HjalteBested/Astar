@@ -29,7 +29,7 @@ const int NODE_TYPE_OBSTACLE = 1;
 const int NODE_TYPE_START = 2;
 const int NODE_TYPE_END = 3;
 
-const bool DEBUG = false;			// Zero means it is disabled completely
+const bool DEBUG = true;			// Zero means it is disabled completely
 
 
 class MapSize {
@@ -50,9 +50,9 @@ class MapNode {
 public:
     int x = -1;	// x-position
     int y = -1; // y-position
-    int h = 0;	// Heuristic cost
-    int g = 0;  // Cost from start to node
-    int obstdist = -1;	// Terrain cost
+    unsigned long h = 0;  // Heuristic cost
+    unsigned long g = 0;  // Cost from start to node
+    int obstdist = -1;	  // Terrain cost
     int type = NODE_TYPE_ZERO;
     int flag = NODE_FLAG_UNDEFINED;
     MapNode *parent = NULL;
@@ -69,13 +69,12 @@ public:
     }
 
     int f(){
-    	if(obstdist > 0) return g + h + 100/obstdist; 
         return g + h;
     }
 
     inline void clear(int type=NODE_TYPE_ZERO){
-    	//this->h = 0;
-    	//this->g = 0;
+    	this->h = 0;
+    	this->g = 0;
         this->obstdist = -1;
     	this->type = type;
     	this->flag = NODE_FLAG_UNDEFINED;
@@ -94,11 +93,11 @@ public:
 	int G_DIAGONAL_COST = 1414;	/// Cost of moving to a diagonal neighbor cell, i.e. ≈ G_DIRECT_COST * sqrt(2);
 	int G_UNKNOWN_COST  = 0;	/// Cost of moving to an unknown neighbor cell
     int H_AMITGAIN = 4;			/// Gain for the tie-breaker. Zero means it is disabled completely.
-	int G_OBST_COST = 1000;		/// The obstacle distance cost is: G_OBST_COST/obstdist.
 	int G_OBST_THRESH = 7;		/// Obstacel distance cost is only active when: obstdist < G_OBST_THRESH
-    int ALLOW_DIAGONAL_PASSTHROUGH = 1;
+    bool ALLOW_DIAGONAL_PASSTHROUGH = true;
 	bool unknownAsObstacle = false;
-	float g_obst_rep = 20.0;
+	float krep = 100.0;
+	float p=2.0;
 
 	MapSize mapSize;				/// Class for storing the size of the Map
 	vector<MapNode> mapData;		/// The actual map data
@@ -108,7 +107,7 @@ public:
 
 	MapNode *startNode=NULL;
 	MapNode *targetNode=NULL;
-	bool wrapMap = true;
+	bool wrapMap = false;
     bool reachedTarget=false;
 	vector<MapNode *> neighborNodes;
 
@@ -129,6 +128,8 @@ public:
             }
         }
 		neighborNodes.reserve(8);
+		openList.reserve(mapSize.size);
+		closedList.reserve(mapSize.size);
         if(DEBUG) cout << "MapSize(" << mapSize.width << ", " << mapSize.height << ", " << mapSize.size << ")" << endl;
     }
 
@@ -145,7 +146,7 @@ public:
 	 *	However, you could simply move (4 northeast) instead, so the heuristic should be 4. 
 	 *	This function handles diagonals: */
 	inline int diagonal_distance(MapNode* node1, MapNode* node2){
-		return max(abs(node2->x - node1->x),abs(node2->y - node1->y));
+		return max(abs(node2->x - node1->x), abs(node2->y - node1->y));
 	}
 
 	/**	If your units can move at any angle (instead of grid directions), 
@@ -175,11 +176,18 @@ public:
 		return cross;
 	}
 
+
+	/** Compute the cost from startnode (node1) to current node (node2). */
+	inline float computeUrep(MapNode *node) {
+		if(node->obstdist <= 0 || node->obstdist >= G_OBST_THRESH || krep <= 0) return 0.0f;
+		return  krep * pow((1.0f/node->obstdist - 1.0f/G_OBST_THRESH),p);
+	}
+
 	/** Compute the heuristic cost, or the estimated cost from 
 	*	current node (node1) to goal node (node2). */
 	inline int computeH(MapNode *node1, MapNode *node2){
 	    if (ALLOW_DIAGONAL_PASSTHROUGH) {
-	        return diagonal_distance(node1, node2)  * G_DIAGONAL_COST;
+	        return diagonal_distance(node1, node2) * G_DIAGONAL_COST;
 	    } else {
 	        return manhattan_distance(node1, node2) * G_DIRECT_COST;
 	    }
@@ -187,19 +195,13 @@ public:
 
 	/** Compute the cost from startnode (node1) to current node (node2). */
 	inline int computeG(MapNode *node1, MapNode *node2) {
-		int cost=0;
-		float obstCost=0.0;
-		if(node2->obstdist > 0 && node2->obstdist < G_OBST_THRESH){
-			obstCost =  g_obst_rep * (1.0f/node2->obstdist - 1.0f/G_OBST_THRESH);
-		}
-
+		int cost = 0;
 	    if(node1->x != node2->x && node1->y != node2->y) 
-	    	cost = G_DIAGONAL_COST * (1 + obstCost); 	// if diagonal movement
+	    	cost = G_DIAGONAL_COST; 	// if diagonal movement
 	    else 
-	    	cost = G_DIRECT_COST   * (1 + obstCost);	// if direct movement
+	    	cost = G_DIRECT_COST;		// if direct movement
 
 		if(node2->type == NODE_TYPE_UNKNOWN) cost += G_UNKNOWN_COST;
-
 	    return cost;
 	}
 
@@ -251,7 +253,7 @@ public:
             return &mapData[y * mapSize.width + x];
         }
 
-    	if (x < 0 || y < 0 || x >= mapSize.width || y >= mapSize.height) return 0;    	
+    	if (x < 0 || y < 0 || x >= mapSize.width || y >= mapSize.height) return NULL;    	
     	return &mapData[y * mapSize.width + x];
 	}
 
@@ -299,7 +301,7 @@ public:
 
 
 	/** Find the path with the minimal total cost. The actual A* search!  */
-	vector<MapNode *> findpath(unsigned long const& maxIter = 1e5) {
+	vector<MapNode *> findpath(unsigned long const& maxIter = 1e9) {
 	    path.clear();
         reachedTarget = false;
 
@@ -311,10 +313,11 @@ public:
 	    while (openList.size() > 0) {
 	        node = openList.at(0);
 
-	        for (int i = 0, max = openList.size(); i < max; i++) {
-                if (openList[i]->f() <= node->f() && openList[i]->h < node->h){
+	        for (int i=0; i<openList.size(); i++){
+	        	if (openList[i]->f() <= node->f()){
 	                node = openList[i];
-	            }
+	            } 
+  
 	        }
 	        openList.erase(remove(openList.begin(), openList.end(), node), openList.end());
 	        node->flag = NODE_FLAG_CLOSED;
@@ -346,18 +349,14 @@ public:
 	            if ( _node->type == NODE_TYPE_OBSTACLE) continue;
 	            else if(_node->type == NODE_TYPE_UNKNOWN && unknownAsObstacle) continue;
 
-	            if(_node->obstdist < 0 && G_OBST_THRESH > 0){ 
-	            	_node->obstdist = computeObstDist(_node);
-	            }
+	            if(_node->obstdist < 0 && G_OBST_THRESH > 0) _node->obstdist = computeObstDist(_node);
 
-	            int g = node->g + computeG(node, _node);
+	            float urepmul = (1.0f + computeUrep(_node));
+	            int g = node->g + computeG(node, _node) * urepmul;
 	            if (_node->flag == NODE_FLAG_UNDEFINED || g < _node->g) {
 	                _node->g = g;
-	                if(G_OBST_THRESH > 0) _node->h = computeH(_node, targetNode) * (1.0f+1.0f/G_OBST_THRESH);
-	                else _node->h = computeH(_node, targetNode);
-	                if(H_AMITGAIN > 0){
-	             	   _node->h += amits_modifier(startNode,_node,targetNode)*H_AMITGAIN;
-	            	}
+	                _node->h = computeH(_node, targetNode);
+	                if(H_AMITGAIN > 0) _node->h += amits_modifier(startNode,_node,targetNode)*H_AMITGAIN*urepmul;
 	                _node->parent = node;
 	                if (_node->flag != NODE_FLAG_OPEN) {
 	                    _node->flag = NODE_FLAG_OPEN;
@@ -387,7 +386,7 @@ public:
 	}
 
 	/** Find the path with the minimal total cost. The actual A* search!  */
-	vector<MapNode *> findpath(int const& xStart, int const& yStart, int const& xTarget, int const& yTarget, unsigned long const& maxIter=1e5){
+	vector<MapNode *> findpath(int const& xStart, int const& yStart, int const& xTarget, int const& yTarget, unsigned long const& maxIter=1e9){
 		// Set StartNode
         putNode(MapNode(xStart, yStart, 0, NODE_TYPE_START));
         startNode = mapAt(xStart, yStart);
@@ -478,11 +477,9 @@ public:
 	//** Find all the neighbors to the node and return a vector of MapNode pointers */
 	uint computeObstDist(MapNode *node){
 	    MapNode *_node;
-	    bool obstacleFound = false;
-	    uint dist = 1;
+		uint dist = 1; 		
 		int x,y;
-
-	    while(!obstacleFound && dist < G_OBST_THRESH){   
+	    while(dist < G_OBST_THRESH){   
 		    x = node->x-dist;
 		    for(y=node->y-dist; y<=node->y+dist; y++){
 		    	if ((_node = mapAt(x,y)) != 0 && _node->x==x && _node->y==y && (_node->type == NODE_TYPE_OBSTACLE)){ _node->obstdist=dist; return dist; }
@@ -504,8 +501,8 @@ public:
 		    }
 		    dist++;
 		}
-		if(!obstacleFound){ _node->obstdist = -1; return -1; }
-		return 0;
+		if(node->type == NODE_TYPE_OBSTACLE) return 0;
+		return -1;
 	}
 
 	/** Print the map */
@@ -526,7 +523,7 @@ public:
 	    while(node.y >= rows)   node.y -= rows;
 	    return node;
 	}
-	
+	/*
 	vector<MapNode *> obstacelEdgeNodes(){
 		vector<MapNode *> obstnodes;
 		// Find all obstacle nodes:
@@ -548,6 +545,7 @@ public:
 		}
 		return obstnodes;
 	}
+	*/
 
 
 	#ifdef ASTAR_USE_OPENCV // To allow using astar without having opencv included

@@ -31,7 +31,7 @@ const string M50_3[] = {
         "assets/Map50_3_Path.png"
 };
 
-const string *FILE_PATH = M50_3;
+const string *FILE_PATH = M50_1;
 
 Astar myAstar;
 Mat map;
@@ -48,7 +48,6 @@ int main(){
     imwrite(FILE_PATH[1], resized);
 
     myAstar = Astar(map.cols, map.rows);
-    myAstar.H_AMITGAIN = 0;
 
     for (int y = 0; y < map.rows; y++) {
         for (int x = 0; x < map.cols; x++) {
