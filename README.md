@@ -12,7 +12,7 @@ OpenCV is not necessarily required, provided that you have found another way to 
 ### Map samples
 
 [Map 50px 1](assets/Map50_0.bmp) | [Map 50px 1](assets/Map50_1.bmp) | [Map 50px 2](assets/Map50_2.bmp) | [Map 50px 3](assets/Map50_3.bmp)
------------- | ------------- | -------------
+------------ | ------------- | ------------- | ------------- 
 ![Map 50px 1](assets/Map50_0.bmp) | ![Map 50px 1](assets/Map50_1.bmp) | ![Map 50px 2](assets/Map50_2.bmp) | ![Map 50px 3](assets/Map50_3.bmp)
 
 ### Previews
