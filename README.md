@@ -1,11 +1,11 @@
-# Astar
+# Astar 																					{#mainpage}
 A* pathfinding algorithm (a.k.a. A* search algorithm) written in C++
 
 This is an widely used pathfinding and searching algorithm; learn more about A* at [Wikipedia](https://en.wikipedia.org/wiki/A*_search_algorithm).
 
-This implementation is heavily based on Makito Sumi's version found here: [Makito Sumi's A-star](https://github.com/SumiMakito/A-star). I have changed a lot of the structure in the code and implemented Astar as a class. Furthermore, I have fixed some problems with the scaling of the heuristic function and added AMITS tie-breaker as an option, see: [breaking-ties](http://theory.stanford.edu/~amitp/GameProgramming/Heuristics.html#breaking-ties). Furthermore, an option for including an obstacle repulsive potential into the cost function has been implemented: As nodes are expanded the distance to the nearest obstacle is computed and based on this distance the cost function is modified. 
+This implementation is based on an implementation by Makito Sumi's found here: [Makito Sumi's A-star](https://github.com/SumiMakito/A-star). The code has changed significantly and many extensions and improvements has been added. The fixed problems with the scaling of the heuristic function led to great performance improvements, so they were suggested to Makito Sumi who modified his original to mach the suggestions. Besides the corrections, the algorithm has been expanded with AMITS tie-breaker  as an option, see: [breaking-ties](http://theory.stanford.edu/~amitp/GameProgramming/Heuristics.html#breaking-ties). Furthermore, an option for including an obstacle repulsive potential into the cost function has been implemented: As nodes are expanded the distance to the nearest obstacle is computed and based on this distance, the cost function is modified. This is highly useful if the path planner is to be used for robot navigation.
 
-This is going to be used in a Laser Scanner obstacle avoidance code that I'm currently working on so the code might be prone to big changes.
+This code is to be used in a Laser Scanner obstacle avoidance scheme that I'm currently working on, so the code might be prone to big changes.
 
 OpenCV is not necessarily required, provided that you have found another way to convert input images into arrays which have the same format used in the example. The Astar class can compile without OpenCV installed as it is only used for visualisation.
 
