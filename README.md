@@ -1,4 +1,4 @@
-# Astar 																					{#mainpage}
+# Astar 
 A* pathfinding algorithm (a.k.a. A* search algorithm) written in C++
 
 This is an widely used pathfinding and searching algorithm; learn more about A* at [Wikipedia](https://en.wikipedia.org/wiki/A*_search_algorithm).
