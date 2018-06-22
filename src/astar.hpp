@@ -102,13 +102,12 @@ public:
 /** Implementation of A* pathfinding algorithm for grid-maps, featured with tie-breaker and obstacle repulsive potential options */
 class Astar {
 public:
-	int G_DIRECT_COST   = 1000; //!< Cost of moving to a direct neighbor cell 
-	int G_DIAGONAL_COST = 1414;	//!< Cost of moving to a diagonal neighbor cell, i.e. ≈ G_DIRECT_COST * sqrt(2);
-	int G_UNKNOWN_COST  = 0;	//!< Cost of moving to an unknown neighbor cell
-    int H_AMITGAIN = 0;			//!< Gain for the tie-breaker. Zero means it is disabled completely.
-	int G_OBST_COST = 1000;		//!< The obstacle distance cost is: G_OBST_COST/obstdist.
-	int G_OBST_THRESH = 12;		//!< Obstacel distance cost is only active when: obstdist < G_OBST_THRESH
-    bool ALLOW_DIAGONAL_PASSTHROUGH = true; //!< Is diagonal passthrough allowed
+	int directCost   = 1000; //!< Cost of moving to a direct neighbor cell 
+	int diagonalCost = 1414;	//!< Cost of moving to a diagonal neighbor cell, i.e. ≈ directCost * sqrt(2);
+	int unknownCost  = 0;	//!< Cost of moving to an unknown neighbor cell
+    int amitgain = 0;			//!< Gain for the tie-breaker. Zero means it is disabled completely.
+	int obstThresh = 12;		//!< Obstacel distance cost is only active when: obstdist < obstThresh
+    bool allowDiagonal = true; //!< Is diagonal passthrough allowed
 	bool unknownAsObstacle = false; //!< If true: Treat unknown area as obstacle, else: Treat unknown area as free
 	float krep = 20.0; //!< Scaling factor for the obstacle repulsive potential
 	float p=1.5; //!< Parameter for controlling the slope of the obstacle repulsive potantial
@@ -197,16 +196,16 @@ public:
 
 	/** Compute the obstacle repulsive potential Urep for a given node */
 	inline float computeUrep(MapNode *node) {
-		if(node->obstdist <= 0 || node->obstdist >= G_OBST_THRESH || krep <= 0) return 0.0f;
-		return  krep * pow((1.0f/node->obstdist - 1.0f/G_OBST_THRESH),p);
+		if(node->obstdist <= 0 || node->obstdist >= obstThresh || krep <= 0) return 0.0f;
+		return  krep * pow((1.0f/node->obstdist - 1.0f/obstThresh),p);
 	}
 
 	/** Compute the heuristic cost, or the estimated cost from current node (node1) to goal node (node2). */
 	inline int computeH(MapNode *node1, MapNode *node2){
-	    if (ALLOW_DIAGONAL_PASSTHROUGH) {
-	        return diagonal_distance(node1, node2) * G_DIAGONAL_COST;
+	    if (allowDiagonal) {
+	        return diagonal_distance(node1, node2) * diagonalCost;
 	    } else {
-	        return manhattan_distance(node1, node2) * G_DIRECT_COST;
+	        return manhattan_distance(node1, node2) * directCost;
 	    }
 	}
 
@@ -214,11 +213,11 @@ public:
 	inline int computeG(MapNode *node1, MapNode *node2) {
 		int cost = 0;
 	    if(node1->x != node2->x && node1->y != node2->y) 
-	    	cost = G_DIAGONAL_COST; 	// if diagonal movement
+	    	cost = diagonalCost; 	// if diagonal movement
 	    else 
-	    	cost = G_DIRECT_COST;		// if direct movement
+	    	cost = directCost;		// if direct movement
 
-		if(node2->type == NODE_TYPE_UNKNOWN) cost += G_UNKNOWN_COST;
+		if(node2->type == NODE_TYPE_UNKNOWN) cost += unknownCost;
 	    return cost;
 	}
 
@@ -367,14 +366,14 @@ public:
 	            if ( _node->type == NODE_TYPE_OBSTACLE) continue;
 	            else if(_node->type == NODE_TYPE_UNKNOWN && unknownAsObstacle) continue;
 
-	            if(_node->obstdist < 0 && G_OBST_THRESH > 0) _node->obstdist = computeObstDist(_node);
+	            if(_node->obstdist < 0 && obstThresh > 0) _node->obstdist = computeObstDist(_node);
 
 	            float urepmul = (1.0f + computeUrep(_node));
 	            int g = node->g + computeG(node, _node) * urepmul;
 	            if (_node->flag == NODE_FLAG_UNDEFINED || g < _node->g) {
 	                _node->g = g;
 	                _node->h = computeH(_node, targetNode);
-	                if(H_AMITGAIN > 0) _node->h += amits_modifier(startNode,_node,targetNode)*H_AMITGAIN*urepmul;
+	                if(amitgain > 0) _node->h += amits_modifier(startNode,_node,targetNode)*amitgain*urepmul;
 	                _node->parent = node;
 	                if (_node->flag != NODE_FLAG_OPEN) {
 	                    _node->flag = NODE_FLAG_OPEN;
@@ -471,7 +470,7 @@ public:
 		    if ((_node = mapAt(node->x, node->y - 1)) != 0 && node->x 	== _node->x && node->y-1 == _node->y) available.push_back(_node); // T
 		    if ((_node = mapAt(node->x + 1, node->y)) != 0 && node->x+1 == _node->x && node->y   == _node->y) available.push_back(_node); // R
 		    if ((_node = mapAt(node->x, node->y + 1)) != 0 && node->x 	== _node->x && node->y+1 == _node->y) available.push_back(_node); // B
-		    if (ALLOW_DIAGONAL_PASSTHROUGH) {
+		    if (allowDiagonal) {
 		        if ((_node = mapAt(node->x - 1, node->y - 1)) != 0 && node->x-1 == _node->x && node->y-1 == _node->y) available.push_back(_node); // LT
 		        if ((_node = mapAt(node->x + 1, node->y - 1)) != 0 && node->x+1 == _node->x && node->y-1 == _node->y) available.push_back(_node); // RT
 		        if ((_node = mapAt(node->x + 1, node->y + 1)) != 0 && node->x+1 == _node->x && node->y+1 == _node->y) available.push_back(_node); // RB
@@ -482,7 +481,7 @@ public:
 		    if ((_node = mapAt(node->x, node->y - 1)) != 0) available.push_back(_node); // T
 		    if ((_node = mapAt(node->x + 1, node->y)) != 0) available.push_back(_node); // R
 		    if ((_node = mapAt(node->x, node->y + 1)) != 0) available.push_back(_node); // B
-		    if (ALLOW_DIAGONAL_PASSTHROUGH) {
+		    if (allowDiagonal) {
 		        if ((_node = mapAt(node->x - 1, node->y - 1)) != 0) available.push_back(_node); // LT
 		        if ((_node = mapAt(node->x + 1, node->y - 1)) != 0) available.push_back(_node); // RT
 		        if ((_node = mapAt(node->x + 1, node->y + 1)) != 0) available.push_back(_node); // RB
@@ -498,7 +497,7 @@ public:
 		uint dist = 1; 		
 		int x,y;
 		if(node->type == NODE_TYPE_OBSTACLE) return 0;
-	    while(dist < G_OBST_THRESH){   
+	    while(dist < obstThresh){   
 		    x = node->x-dist;
 		    for(y=node->y-dist; y<=node->y+dist; y++){
 		    	if ((_node = mapAt(x,y)) != 0 && _node->x==x && _node->y==y && (_node->type == NODE_TYPE_OBSTACLE)){ _node->obstdist=dist; return dist; }
